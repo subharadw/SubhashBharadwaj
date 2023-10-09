@@ -1,0 +1,38 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"location": {
+			"value": "eastus"
+		},
+		"sqlServerName": {
+			"value": "sqldb-001"
+		},
+		"databaseName": {
+			"value": "sqldb-001-db001"
+		},
+		"sku": {
+			"value": "Basic"
+		},
+		"collation": {
+			"value": "SQL_Latin1_General_CP1_CI_AS"
+		},
+		"maxSizeBytes": {
+			"value": "2GB"
+		},
+		"catalogCollation": {
+			"value": "SQL_Latin1_General_CP1_CI_AS"
+		},
+		"zoneRedundant": {
+			"value": false
+		},
+		"licenseType": {
+			"value": "LicenseIncluded"
+		},
+
+		//DEFAULT PARAMETERS
+		"resourceowner": {
+			"value": "Subhash Bharadwaj"
+		}
+	}
+}

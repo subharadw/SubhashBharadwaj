@@ -1,0 +1,83 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"location": {
+			"value": "East US"
+		},
+		"webSiteName": {
+			"value": "test-web-app-001"
+		},
+		"appServicePlanName": {
+			"value": "appservice-plan-001"
+		},
+		"appServicePlanResourceGroupName": {
+			"value": "test-rg-001"
+		},
+		"appServicePlanId": {
+			"value": "/subscriptions/subscriprionID/resourceGroups/test-rg-001/providers/microsoft.insights/components/testapp001"
+		},
+		"runtimeStack": {
+			"value": "dotnet"
+		},
+		"phpVersion": {
+			"value": "OFF"
+		},
+		"netFrameworkVersion": {
+			"value": "v5.0"
+		},
+		"reserved": {
+			"value": false
+		},
+		"hyperV": {
+			"value": false
+		},
+		"alwaysOn": {
+			"value": true
+		},
+		"use32bit": {
+			"value": false
+		},
+		"numberOfWorkers": {
+			"value": "1"
+		},
+		"appInsightsName": {
+			"value": "testappi001"
+		},
+		"appInsightsResourceGroupName": {
+			"value": "test-rg-001"
+		},
+		"appInsightsInstrumentationKey": {
+			"value": "2et8rwuywteststapp"
+		},
+		"appInsightsConnectionString": {
+			"value": "InstrumentationKey=2et8rwuywteststapp;IngestionEndpoint=https://eastus-3.in.applicationinsights.azure.com/"
+		},
+		"keyVaultName": {
+			"value": "testappkv"
+		},
+		"keyVaultResourceGroupName": {
+			"value": "test-rg-001"
+		},
+		"appUserManagedIdentity": {
+			"value": "test-app-id-001"
+		},
+		"customHostName": {
+			"value": "www.xxx.com"
+		},
+		"virtualNetworkResourceGroupName": {
+			"value": "stringRG"
+		},
+		"virtualNetworkName": {
+			"value": "stringVnet"
+		},
+		"subnetName": {
+			"value": "app-sn-001-10.0.0.0-24"
+		},
+
+		// DEFAULT PARAMETERS
+		"resourceowner": {
+			"value": "string"
+		}
+	}
+}

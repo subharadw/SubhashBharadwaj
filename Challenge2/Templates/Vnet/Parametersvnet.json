@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"resourceGroupName": {
+			"value": "Test-Vnet-001"
+		},
+		"location": {
+			"value": "eastus"
+		},
+		"virtualNetworkName": {
+			"value": "hcb-06-d1-vnet-001"
+		},
+		"addressPrefix": {
+			"value": "10.0.0.0/16"
+		},
+		"dnsServers": {
+			"value": "172.17.2.4, 172.17.2.5"
+		},
+
+	}
+}

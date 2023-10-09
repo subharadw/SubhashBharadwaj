@@ -1,0 +1,334 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		//"subscriptionId": {
+		//	"type": "string"
+		//},
+		"location": {
+			"type": "string"
+		},
+		"webSiteName": {
+			"type": "string"
+		},
+		"alwaysOn": {
+			"type": "bool"
+		},
+		"runtimeStack": {
+			"type": "string"
+		},
+		"phpVersion": {
+			"type": "string"
+		},
+		"netFrameworkVersion": {
+			"type": "string"
+		},
+		"reserved": {
+			"type": "bool"
+		},
+		"hyperV": {
+			"type": "bool"
+		},
+		"alwaysOn": {
+			"type": "bool"
+		},
+		"use32bit": {
+			"type": "bool"
+		},
+		"numberOfWorkers": {
+			"type": "string"
+		},
+
+		"appServicePlanName": {
+			"type": "string"
+		},
+		"appServicePlanResourceGroupName": {
+			"type": "string"
+		},
+		"appServicePlanId": {
+			"type": "string"
+		},
+
+
+		"appInsightsName": {
+			"type": "string"
+		},
+		"appInsightsResourceGroupName": {
+			"type": "string"
+		},
+		"appInsightsInstrumentationKey": {
+			"type": "string"
+		},
+		"appInsightsConnectionString": {
+			"type": "string"
+		},
+
+		"keyVaultName": {
+			"type": "string"
+		},
+		"keyVaultResourceGroupName": {
+			"type": "string"
+		},
+		"appUserManagedIdentity": {
+			"type": "string"
+		},
+
+		"customHostName": {
+			"type": "string"
+		},
+
+		"virtualNetworkResourceGroupName": {
+			"type": "string"
+		},
+		"virtualNetworkName": {
+			"type": "string"
+		},
+		"subnetName": {
+			"type": "string"
+		},
+
+		// DEFAULT PARAMETERS
+		"resourceowner": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"tags": {	
+			"sharedemailaddress": "[parameters('sharedemailaddress')]",
+			"resourceowner": "[parameters('resourceowner')]",
+		"privateEndpointName": "[concat(parameters('webSiteName'),'-pe')]",
+		"slotPrivateEndpointName": "[concat(parameters('webSiteName'),'-swap-pe')]"
+	},
+	"resources": [
+		{
+			"apiVersion": "2018-11-01",
+			"name": "[parameters('webSiteName')]",
+			"type": "Microsoft.Web/sites",
+			"location": "[parameters('location')]",
+			"tags": "[variables('tags')]",
+			"dependsOn": [],
+			"identity": {
+				"type": "UserAssigned",
+				"userAssignedIdentities": {
+					"[concat('/subscriptions/' , subscription().subscriptionId, '/resourcegroups/', parameters('keyVaultResourceGroupName'), '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('appUserManagedIdentity'))]": {}
+				}
+			},
+			"properties": {
+				"name": "[parameters('webSiteName')]",
+				"reserved": "[parameters('reserved')]",
+				"hyperV": "[parameters('hyperV')]",
+				"httpsOnly": true,
+				"siteConfig": {
+					"appSettings": [
+						{
+							"name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+							"value": "[parameters('appInsightsInstrumentationKey')]"
+						},
+						{
+							"name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+							"value": "[parameters('appInsightsConnectionString')]"
+						},
+						{
+							"name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+							"value": "~2"
+						},
+						{
+							"name": "XDT_MicrosoftApplicationInsights_Mode",
+							"value": "default"
+						}
+					],
+					"metadata": [
+						{
+							"name": "CURRENT_STACK",
+							"value": "[parameters('runtimeStack')]"
+						}
+					],
+					"minimumElasticInstanceCount": 1,
+					"phpVersion": "[parameters('phpVersion')]",
+					"netFrameworkVersion": "[parameters('netFrameworkVersion')]",
+					"alwaysOn": "[parameters('alwaysOn')]",
+					"use32BitWorkerProcess": "[parameters('use32bit')]",
+					"numberOfWorkers": "[parameters('numberOfWorkers')]"
+				},
+				"serverFarmId": "[parameters('appServicePlanId')]",
+				"clientAffinityEnabled": true
+			}
+		},
+		{
+			"type": "Microsoft.Web/sites/hostNameBindings",
+			"apiVersion": "2021-02-01",
+			"name": "[concat(parameters('webSiteName'), '/', parameters('webSiteName'), '.azurewebsites.net')]",
+			"location": "[parameters('location')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]"
+			],
+			"properties": {
+				"siteName": "[parameters('webSiteName')]",
+				"hostNameType": "Verified"
+			}
+		},
+		{
+			"type": "Microsoft.Network/privateEndpoints",
+			"apiVersion": "2020-11-01",
+			"name": "[variables('privateEndpointName')]",
+			"location": "[parameters('location')]",
+			"tags": "[variables('tags')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]"
+			],
+			"properties": {
+				"privateLinkServiceConnections": [
+					{
+						"name": "[variables('privateEndpointName')]",
+						"properties": {
+							"privateLinkServiceId": "[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]",
+							"groupIds": [
+								"sites"
+							],
+							"privateLinkServiceConnectionState": {
+								"status": "Approved",
+								"actionsRequired": "None"
+							}
+						}
+					}
+				],
+				"manualPrivateLinkServiceConnections": [],
+				"subnet": {
+					"id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]"
+				}
+				//,
+				//"customDnsConfigs": [
+				//  {
+				//    "fqdn": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]",
+				//    "ipAddresses": [
+				//      "10.223.32.76"
+				//    ]
+				//  }
+				//]
+			}
+		},
+		{
+			"type": "Microsoft.Web/sites/slots",
+			"apiVersion": "2021-02-01",
+			"name": "[concat(parameters('webSiteName'), '/swap')]",
+			"location": "[parameters('location')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]"
+			],
+			"tags": "[variables('tags')]",
+			"identity": {
+				"type": "UserAssigned",
+				"userAssignedIdentities": {
+					"[concat('/subscriptions/' , subscription().subscriptionId, '/resourcegroups/', parameters('keyVaultResourceGroupName'), '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('appUserManagedIdentity'))]": {}
+				}
+			},
+			"properties": {
+				"enabled": true,
+				"hostNameSslStates": [
+					{
+						"name": "[concat(parameters('webSiteName'), '-swap.azurewebsites.net')]",
+						"sslState": "Disabled",
+						"hostType": "Standard"
+					},
+					{
+						"name": "[concat(parameters('webSiteName'),'-swap.scm.azurewebsites.net')]",
+						"sslState": "Disabled",
+						"hostType": "Repository"
+					}
+				],
+				"serverFarmId": "[parameters('appServicePlanId')]",
+				"reserved": "[parameters('reserved')]",
+				//"isXenon": false,
+				"hyperV": "[parameters('hyperV')]",
+				"httpsOnly": true,
+				"siteConfig": {
+					//"acrUseManagedIdentityCreds": false,
+					//"http20Enabled": false,
+					//"functionAppScaleLimit": 0,
+					"minimumElasticInstanceCount": 1,
+					"phpVersion": "[parameters('phpVersion')]",
+					"netFrameworkVersion": "[parameters('netFrameworkVersion')]",
+					"alwaysOn": "[parameters('alwaysOn')]",
+					"use32BitWorkerProcess": "[parameters('use32bit')]",
+					"numberOfWorkers": "[parameters('numberOfWorkers')]",
+					"appSettings": [
+						{
+							"name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+							"value": "[parameters('appInsightsInstrumentationKey')]"
+						},
+						{
+							"name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+							"value": "[parameters('appInsightsConnectionString')]"
+						},
+						{
+							"name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+							"value": "~2"
+						},
+						{
+							"name": "XDT_MicrosoftApplicationInsights_Mode",
+							"value": "default"
+						}
+					],
+					"metadata": [
+						{
+							"name": "CURRENT_STACK",
+							"value": "[parameters('runtimeStack')]"
+						}
+					]
+				},
+				"scmSiteAlsoStopped": false,
+				"clientAffinityEnabled": true,
+				"clientCertEnabled": false,
+				"clientCertMode": "Required",
+				"hostNamesDisabled": false,
+				//"customDomainVerificationId": "23359EDD759D5F92DBD053148277EFA0EAAEC448A2F43026292926F6A500391D",
+				"containerSize": 0,
+				"dailyMemoryTimeQuota": 0,
+				"httpsOnly": false,
+				"redundancyMode": "None",
+				"storageAccountRequired": false,
+				"keyVaultReferenceIdentity": "SystemAssigned"
+			}
+		},
+		{
+			"type": "Microsoft.Network/privateEndpoints",
+			"apiVersion": "2020-11-01",
+			"name": "[variables('slotPrivateEndpointName')]",
+			"location": "[parameters('location')]",
+			"tags": "[variables('tags')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Web/sites/slots', parameters('webSiteName'), 'swap')]"
+			],
+			"properties": {
+				"privateLinkServiceConnections": [
+					{
+						"name": "[variables('privateEndpointName')]",
+						"properties": {
+							"privateLinkServiceId": "[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]",
+							"groupIds": [
+								"sites-swap"
+							],
+							"privateLinkServiceConnectionState": {
+								"status": "Approved",
+								"actionsRequired": "None"
+							}
+						}
+					}
+				],
+				"manualPrivateLinkServiceConnections": [],
+				"subnet": {
+					"id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]"
+				}
+				//,
+				//"customDnsConfigs": [
+				//  {
+				//    "fqdn": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]",
+				//    "ipAddresses": [
+				//      "10.0.0.1"
+				//    ]
+				//  }
+				//]
+			}
+		}
+	]
+}

@@ -1,0 +1,514 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.1.0.0",
+	"metadata": {
+		"comments": "Template used to create a SQL Server database resource.",
+	},
+	"parameters": {
+		"sqlServerName": {
+			"type": "string",
+			"metadata": {
+				"description": "(required) SQL server name."
+			}
+		},
+		"databaseName": {
+			"type": "string",
+			"metadata": {
+				"description": "(required) SQL server database name."
+			}
+		},
+		"sku": {
+			"defaultValue": "Basic",
+			"allowedValues": [
+				"Basic",
+				"Standard-S0",
+				"Standard-S1",
+				"Standard-S2",
+				"Standard-S3",
+				"Standard-S4",
+				"Standard-S6",
+				"Standard-S7",
+				"Standard-S9",
+				"Standard-S12",
+				"Premium-P1",
+				"Premium-P2",
+				"Premium-P4",
+				"Premium-P6",
+				"Premium-P11",
+				"Premium-P15",
+				"DataWarehouse-DW100c",
+				"DataWarehouse-DW200c",
+				"DataWarehouse-DW300c",
+				"DataWarehouse-DW400c",
+				"DataWarehouse-DW500c",
+				"DataWarehouse-DW1000c",
+				"DataWarehouse-DW1500c",
+				"DataWarehouse-DW2000c",
+				"DataWarehouse-DW2500c",
+				"DataWarehouse-DW3000c",
+				"DataWarehouse-DW5000c",
+				"DataWarehouse-DW6000c",
+				"DataWarehouse-DW7500c",
+				"DataWarehouse-DW10000c",
+				"DataWarehouse-DW15000c",
+				"DataWarehouse-DW30000c",
+				"Stretch-DS100",
+				"Stretch-DS200",
+				"Stretch-DS300",
+				"Stretch-DS400",
+				"Stretch-DS500",
+				"Stretch-DS600",
+				"Stretch-DS1000",
+				"Stretch-DS1200",
+				"Stretch-DS1500",
+				"Stretch-DS2000"
+			],
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The name and tier of the SKU."
+			}
+		},
+		"location": {
+			"defaultValue": "",
+			"type": "string",
+			"metadata": {
+				"description": "(required) MS region into which to deploy this resource. The location of the hosting resource group will be used if this value is left blank."
+			}
+		},
+		"createMode": {
+			"defaultValue": "Default",
+			"allowedValues": [
+				"Copy",
+				"Default",
+				"PointInTimeRestore",
+				"Recovery",
+				"Restore",
+				"RestoreLongTermRetentionBackup",
+				"Secondary"
+			],
+			"type": "string",
+			"metadata": {
+				"description": "(optional) Specifies the mode of database creation. Default value is \"Default\". More information found at https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/2017-10-01-preview/servers/databases"
+			}
+		},
+		"collation": {
+			"defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The collation of the database."
+			}
+		},
+		"maxSizeBytes": {
+			"defaultValue": "2GB",
+			"allowedValues": [
+				"100MB",
+				"500MB",
+				"1GB",
+				"2GB",
+				"5GB",
+				"10GB",
+				"20GB",
+				"30GB",
+				"40GB",
+				"50GB",
+				"100GB",
+				"150GB",
+				"200GB",
+				"250GB",
+				"300GB",
+				"400GB",
+				"500GB",
+				"750GB",
+				"1TB"
+			],
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The max size of the database expressed in bytes. Default value is 2GB."
+			}
+		},
+		"catalogCollation": {
+			"defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+			"type": "string",
+			"metadata": {
+				"description": "(optional) Collation of the metadata catalog. - DATABASE_DEFAULT or SQL_Latin1_General_CP1_CI_AS. For a list of supported collation values, run the following on your database: select name, COLLATIONPROPERTY(name, 'CodePage') as Code_Page, description from sys.fn_HelpCollations();"
+			}
+		},
+		"sampleName": {
+			"defaultValue": "",
+			"allowedValues": [
+				"",
+				"AdventureWorksLT",
+				"WideWorldImportersStd",
+				"WideWorldImportersFull"
+			],
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The name of the sample schema to apply when creating this database. Default value is \"\"."
+			}
+		},
+		"elasticPoolId": {
+			"defaultValue": "",
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The resource identifier of the elastic pool containing this database."
+			}
+		},
+		"sourceDatabaseId": {
+			"defaultValue": "",
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The resource identifier of the source database associated with create operation of this database."
+			}
+		},
+		"restorePointInTime": {
+			"defaultValue": "",
+			"type": "string",
+			"metadata": {
+				"description": "(optional) Specifies the point in time (ISO8601 format) of the source database that will be restored to create the new database."
+			}
+		},
+		"sourceDatabaseDeletionDate": {
+			"defaultValue": "",
+			"type": "string",
+			"metadata": {
+				"description": "(optional) Specifies the time that the database was deleted."
+			}
+		},
+		"recoveryServicesRecoveryPointId": {
+			"defaultValue": "",
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The resource identifier of the recovery point associated with create operation of this database."
+			}
+		},
+		"longTermRetentionBackupResourceId": {
+			"defaultValue": "",
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The resource identifier of the long term retention backup associated with create operation of this database."
+			}
+		},
+		"recoverableDatabaseId": {
+			"defaultValue": "",
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The resource identifier of the recoverable database associated with create operation of this database."
+			}
+		},
+		"restorableDroppedDatabaseId": {
+			"defaultValue": "",
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The resource identifier of the restorable dropped database associated with create operation of this database."
+			}
+		},
+		"zoneRedundant": {
+			"defaultValue": false,
+			"type": "bool",
+			"metadata": {
+				"description": "(optional) Whether or not this database is zone redundant, which means the replicas of this database will be spread across multiple availability zones."
+			}
+		},
+		"licenseType": {
+			"defaultValue": "",
+			"allowedValues": [
+				"",
+				"LicenseIncluded",
+				"BasePrice"
+			],
+			"type": "string",
+			"metadata": {
+				"description": "(optional) The license type to apply for this database. - LicenseIncluded or BasePrice"
+			}
+		},
+		"readScale": {
+			"defaultValue": "Disabled",
+			"allowedValues": [
+				"Enabled",
+				"Disabled"
+			],
+			"type": "string"
+		},
+		// Default Parameter
+		"resourceowner": {
+			"type": "string"
+		}
+
+	},
+	"variables": {
+		"location": "[if(equals(parameters('location'),''), resourceGroup().location, parameters('location'))]",
+		"tags": {
+			"resourceowner": "[parameters('resourceowner')]",
+		},
+		"maxSizeBytesMap": {
+			"100MB": 104857600,
+			"500MB": 524288000,
+			"1GB": 1073741824,
+			"2GB": 2147483648,
+			"5GB": 5368709120,
+			"10GB": 10737418240,
+			"20GB": 21474836480,
+			"30GB": 32212254720,
+			"40GB": 42949672960,
+			"50GB": 53687091200,
+			"100GB": 107374182400,
+			"150GB": 161061273600,
+			"200GB": 214748364800,
+			"250GB": 268435456000,
+			"300GB": 322122547200,
+			"400GB": 429496729600,
+			"500GB": 536870912000,
+			"750GB": 805306368000,
+			"1TB": 1099511627776
+		},
+		"maxTier": {
+			"Basic": "2GB",
+			"Standard": "250GB",
+			"Premium": "1TB"
+		},
+		"skus": {
+			"Basic": {
+				"name": "Basic",
+				"tier": "Basic",
+				"capacity": 5
+			},
+			"Standard-S0": {
+				"name": "S0",
+				"tier": "Standard",
+				"capacity": 10
+			},
+			"Standard-S1": {
+				"name": "S1",
+				"tier": "Standard",
+				"capacity": 20
+			},
+			"Standard-S2": {
+				"name": "S2",
+				"tier": "Standard",
+				"capacity": 50
+			},
+			"Standard-S3": {
+				"name": "S3",
+				"tier": "Standard",
+				"capacity": 100
+			},
+			"Standard-S4": {
+				"name": "S4",
+				"tier": "Standard",
+				"capacity": 200
+			},
+			"Standard-S6": {
+				"name": "S6",
+				"tier": "Standard",
+				"capacity": 400
+			},
+			"Standard-S7": {
+				"name": "S7",
+				"tier": "Standard",
+				"capacity": 800
+			},
+			"Standard-S9": {
+				"name": "S9",
+				"tier": "Standard",
+				"capacity": 1600
+			},
+			"Standard-S12": {
+				"name": "S12",
+				"tier": "Standard",
+				"capacity": 3000
+			},
+			"Premium-P1": {
+				"name": "P1",
+				"tier": "Premium",
+				"capacity": 125
+			},
+			"Premium-P2": {
+				"name": "P2",
+				"tier": "Premium",
+				"capacity": 250
+			},
+			"Premium-P4": {
+				"name": "P4",
+				"tier": "Premium",
+				"capacity": 500
+			},
+			"Premium-P6": {
+				"name": "P6",
+				"tier": "Premium",
+				"capacity": 1000
+			},
+			"Premium-P11": {
+				"name": "P11",
+				"tier": "Premium",
+				"capacity": 1750
+			},
+			"Premium-P15": {
+				"name": "P15",
+				"tier": "Premium",
+				"capacity": 4000
+			},
+			"DataWarehouse-DW100c": {
+				"name": "DW100c",
+				"tier": "DataWarehouse",
+				"capacity": 900
+			},
+			"DataWarehouse-DW200c": {
+				"name": "DW200c",
+				"tier": "DataWarehouse",
+				"capacity": 1800
+			},
+			"DataWarehouse-DW300c": {
+				"name": "DW300c",
+				"tier": "DataWarehouse",
+				"capacity": 2700
+			},
+			"DataWarehouse-DW400c": {
+				"name": "DW400c",
+				"tier": "DataWarehouse",
+				"capacity": 3600
+			},
+			"DataWarehouse-DW500c": {
+				"name": "DW500c",
+				"tier": "DataWarehouse",
+				"capacity": 4500
+			},
+			"DataWarehouse-DW1000c": {
+				"name": "DW1000c",
+				"tier": "DataWarehouse",
+				"capacity": 9000
+			},
+			"DataWarehouse-DW1500c": {
+				"name": "DW1500c",
+				"tier": "DataWarehouse",
+				"capacity": 13500
+			},
+			"DataWarehouse-DW2000c": {
+				"name": "DW2000c",
+				"tier": "DataWarehouse",
+				"capacity": 18000
+			},
+			"DataWarehouse-DW2500c": {
+				"name": "DW2500c",
+				"tier": "DataWarehouse",
+				"capacity": 22500
+			},
+			"DataWarehouse-DW3000c": {
+				"name": "DW3000c",
+				"tier": "DataWarehouse",
+				"capacity": 27000
+			},
+			"DataWarehouse-DW5000c": {
+				"name": "DW5000c",
+				"tier": "DataWarehouse",
+				"capacity": 45000
+			},
+			"DataWarehouse-DW6000c": {
+				"name": "DW6000c",
+				"tier": "DataWarehouse",
+				"capacity": 54000
+			},
+			"DataWarehouse-DW7500c": {
+				"name": "DW7500c",
+				"tier": "DataWarehouse",
+				"capacity": 67500
+			},
+			"DataWarehouse-DW10000c": {
+				"name": "DW10000c",
+				"tier": "DataWarehouse",
+				"capacity": 90000
+			},
+			"DataWarehouse-DW15000c": {
+				"name": "DW15000c",
+				"tier": "DataWarehouse",
+				"capacity": 135000
+			},
+			"DataWarehouse-DW30000c": {
+				"name": "DW30000c",
+				"tier": "DataWarehouse",
+				"capacity": 270000
+			},
+			"Stretch-DS100": {
+				"name": "DS100",
+				"tier": "Stretch",
+				"capacity": 750
+			},
+			"Stretch-DS200": {
+				"name": "DS200",
+				"tier": "Stretch",
+				"capacity": 1500
+			},
+			"Stretch-DS300": {
+				"name": "DS300",
+				"tier": "Stretch",
+				"capacity": 2250
+			},
+			"Stretch-DS400": {
+				"name": "DS400",
+				"tier": "Stretch",
+				"capacity": 3000
+			},
+			"Stretch-DS500": {
+				"name": "DS500",
+				"tier": "Stretch",
+				"capacity": 3750
+			},
+			"Stretch-DS600": {
+				"name": "DS600",
+				"tier": "Stretch",
+				"capacity": 4500
+			},
+			"Stretch-DS1000": {
+				"name": "DS1000",
+				"tier": "Stretch",
+				"capacity": 7500
+			},
+			"Stretch-DS1200": {
+				"name": "DS1200",
+				"tier": "Stretch",
+				"capacity": 9000
+			},
+			"Stretch-DS1500": {
+				"name": "DS1500",
+				"tier": "Stretch",
+				"capacity": 11250
+			},
+			"Stretch-DS2000": {
+				"name": "DS2000",
+				"tier": "Stretch",
+				"capacity": 15000
+			}
+		}
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Sql/servers/databases",
+			"name": "[concat(parameters('sqlServerName'), '/', parameters('databaseName'))]",
+			"apiVersion": "2017-10-01-preview",
+			"location": "[variables('location')]",
+			"tags": "[variables('tags')]",
+			"sku": {
+				"name": "[variables('skus')[parameters('sku')].name]",
+				"tier": "[variables('skus')[parameters('sku')].tier]",
+				"capacity": "[variables('skus')[parameters('sku')].capacity]"
+			},
+			"properties": {
+				"createMode": "[parameters('createMode')]",
+				"collation": "[parameters('collation')]",
+				"maxSizeBytes": "[if(or(equals(variables('skus')[parameters('sku')].tier,'DataWarehouse'),equals(variables('skus')[parameters('sku')].tier,'Stretch')),json('null'),min(variables('maxSizeBytesMap')[parameters('maxSizeBytes')], variables('maxSizeBytesMap')[variables('maxTier')[variables('skus')[parameters('sku')].tier]]))]",
+				"sampleName": "[if(empty(parameters('sampleName')), json('null'), parameters('sampleName'))]",
+				"elasticPoolId": "[if(empty(parameters('elasticPoolId')), json('null'), parameters('elasticPoolId'))]",
+				"sourceDatabaseId": "[if(empty(parameters('sourceDatabaseId')), json('null'), parameters('sourceDatabaseId'))]",
+				"restorePointInTime": "[if(empty(parameters('restorePointInTime')), json('null'), parameters('restorePointInTime'))]",
+				"sourceDatabaseDeletionDate": "[if(empty(parameters('sourceDatabaseDeletionDate')), json('null'), parameters('sourceDatabaseDeletionDate'))]",
+				"recoveryServicesRecoveryPointId": "[if(empty(parameters('recoveryServicesRecoveryPointId')), json('null'), parameters('recoveryServicesRecoveryPointId'))]",
+				"longTermRetentionBackupResourceId": "[if(empty(parameters('longTermRetentionBackupResourceId')), json('null'), parameters('longTermRetentionBackupResourceId'))]",
+				"recoverableDatabaseId": "[if(empty(parameters('recoverableDatabaseId')), json('null'), parameters('recoverableDatabaseId'))]",
+				"restorableDroppedDatabaseId": "[if(empty(parameters('restorableDroppedDatabaseId')), json('null'), parameters('restorableDroppedDatabaseId'))]",
+				"catalogCollation": "[parameters('catalogCollation')]",
+				"zoneRedundant": "[parameters('zoneRedundant')]",
+				"licenseType": "[if(empty(parameters('licenseType')), json('null'), parameters('licenseType'))]",
+				"readScale": "[parameters('readScale')]"
+			}
+		}
+	]
+}

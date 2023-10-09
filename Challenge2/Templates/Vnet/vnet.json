@@ -1,0 +1,66 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"resourceGroupName": {
+			"type": "string",
+			"metadata": {
+				"description": "This is your resource group name"
+			}
+		},
+		"location": {
+			"type": "string",
+			"defaultValue": "[resourceGroup().location]",
+			"metadata": {
+				"description": "Location for all resources."
+			}
+		},
+		"virtualNetworkName": {
+			"type": "string",
+			"metadata": {
+				"description": "This is your Virtual Network"
+			}
+		},
+		"addressPrefix": {
+			"type": "string",
+			"metadata": {
+				"description": "The CIDR address space for your Virtual Network in Azure"
+			}
+		},
+
+		"dnsServers": {
+			"type": "String",
+			//"defaultValue": [
+			//	"172.17.2.4",
+			//	"172.17.2.5"
+			//],
+			"metadata": {
+				"description": "DNS Servers"
+			}
+		},
+	"resources": [
+		{
+			"condition": "[equals(parameters('vnetExist'), 'false')]",
+			"apiVersion": "2020-05-01",
+			"type": "Microsoft.Network/virtualNetworks",
+			"name": "[parameters('virtualNetworkName')]",
+			"location": "[parameters('location')]",
+			"dependsOn": [
+			],
+			"properties": {
+				"addressSpace": {
+					"addressPrefixes": [
+						"[parameters('addressPrefix')]"
+					]
+				}
+				//,
+				//"dhcpOptions": {
+				//	"dnsServers": [
+				//		"[parameters('dnsServers')]"
+				//	]
+				//}
+			}
+		}
+
+	]
+}
